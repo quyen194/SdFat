@@ -206,6 +206,126 @@ class FatVolume : public  FatPartition {
     FatFile file;
     return file.open(this, path, O_WRONLY) && file.truncate(length);
   }
+  //----------------------------------------------------------------------------
+  /** Set the working directory's current position to zero. */
+  void vwdRewind() { m_vwd.seekSet(0); }
+  //----------------------------------------------------------------------------
+  /** \return The current position for a file or directory. */
+  uint32_t vwdCurPosition() const { return m_vwd.curPosition(); }
+  //----------------------------------------------------------------------------
+  /** Sets the working directory's current position.
+   *
+   * \param[in] pos The new position of sub entry.
+   *
+   * \return true for success or false for failure.
+   */
+  bool vwdSeekSet(uint32_t pos) { return m_vwd.seekSet(pos); }
+  //----------------------------------------------------------------------------
+  /** Open the next file or subdirectory in a directory.
+   *
+   * \param[in] oflag bitwise-inclusive OR of open flags.
+   *                  See see FatFile::open(FatFile*, const char*, uint8_t).
+   *
+   * \return true for success or false for failure.
+   */
+  File32 vwdOpenNext(oflag_t oflag = O_RDONLY) {
+    File32 tmpFile;
+    tmpFile.openNext(vwd(), oflag);
+    return tmpFile;
+  }
+  //----------------------------------------------------------------------------
+  /** \return All error bits. */
+  uint8_t vwdGetError() const { return m_vwd.m_error; }
+  //----------------------------------------------------------------------------
+  /** Remove current working directory.
+   *
+   * Current working directory will be removed only if it is empty.
+   *
+   * \return true for success or false for failure.
+   */
+  bool vwdRmdir() {
+    return m_vwd.rmdir() && chdir();
+  }
+  //----------------------------------------------------------------------------
+  /** Recursively delete current working directory and all contained files.
+   *
+   * This is like the Unix/Linux 'rm -rf *' if called with the root directory
+   * hence the name.
+   *
+   * Warning - This will remove all contents of the directory including
+   * subdirectories.  The directory will then be removed if it is not root.
+   * The read-only attribute for files will be ignored.
+   *
+   * \note This function should not be used to delete the 8.3 version of
+   * a directory that has a long name.  See remove() and rmdir().
+   *
+   * \return true for success or false for failure.
+   */
+  bool vwdRmRfStar() {
+    return m_vwd.rmRfStar() && chdir();
+  }
+  //----------------------------------------------------------------------------
+  /**
+   * Test for the existence of a file.
+   *
+   * \param[in] relative_path Relative path of the file to be tested for.
+   *
+   * \return true if the file exists else false.
+   */
+  bool relExists(const char* relative_path) {
+    FatFile tmp;
+    return tmp.open(vwd(), relative_path, O_RDONLY);
+  }
+  //----------------------------------------------------------------------------
+  /** Remove a file from the volume root directory.
+   *
+   * \param[in] relative_path Relative path of the file to be tested for.
+   *
+   * \return true for success or false for failure.
+   */
+  bool relRemove(const char* relative_path) {
+    FatFile tmp;
+    return tmp.open(vwd(), relative_path, O_WRONLY) && tmp.remove();
+  }
+  //----------------------------------------------------------------------------
+  /** Remove a subdirectory from the current working directory.
+   *
+   * \param[in] path A path with a valid name for the subdirectory.
+   *
+   * The subdirectory file will be removed only if it is empty.
+   *
+   * \return true for success or false for failure.
+   */
+  bool relRmdir(const char* relative_path) {
+    FatFile sub;
+    return sub.open(vwd(), relative_path, O_RDONLY) && sub.rmdir();
+  }
+  //----------------------------------------------------------------------------
+  /** \return True if this is a directory. */
+  bool isDir(const char* relative_path) {
+    FatFile dir;
+    bool result = false;
+    if (dir.open(vwd(), relative_path, O_RDONLY)) {
+      if (dir.isDir()) {
+        result = true;
+      }
+      dir.close();
+    }
+    return result;
+  }
+  //----------------------------------------------------------------------------
+  /** \return True if this is a normal file. */
+  bool isFile(const char* relative_path) {
+    FatFile file;
+    bool result = false;
+    if (file.open(vwd(), relative_path, O_RDONLY)) {
+      if (file.isFile()) {
+        result = true;
+      }
+      file.close();
+    }
+    return result;
+  }
 #if ENABLE_ARDUINO_SERIAL
    /** List the directory contents of the root directory to Serial.
    *
