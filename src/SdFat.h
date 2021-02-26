@@ -276,7 +276,7 @@ class SdBase : public Vol {
   }
   //----------------------------------------------------------------------------
   /** \return SD card error data. */
-  uint8_t sdErrorData() {return m_card ? m_card->errorData() : 0;}
+  uint32_t sdErrorData() {return m_card ? m_card->errorData() : 0;}
   //----------------------------------------------------------------------------
   /** \return pointer to base volume */
   Vol* vol() {return reinterpret_cast<Vol*>(this);}
