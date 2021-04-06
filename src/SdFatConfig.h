@@ -191,7 +191,7 @@ typedef uint8_t SdCsPin_t;
  * Some cards will not sleep in low power mode unless CHECK_FLASH_PROGRAMMING
  * is non-zero.
  */
-#define CHECK_FLASH_PROGRAMMING 0
+#define CHECK_FLASH_PROGRAMMING 1
 //------------------------------------------------------------------------------
 /**
  * Set MAINTAIN_FREE_CLUSTER_COUNT nonzero to keep the count of free clusters
