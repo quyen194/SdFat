@@ -247,7 +247,7 @@ class FatVolume : public FatPartition {
    */
   File32 vwdOpenNext(oflag_t oflag = O_RDONLY) {
     File32 tmpFile;
-    tmpFile.openNext(vwd(), oflag);
+    tmpFile.openNext(&m_vwd, oflag);
     return tmpFile;
   }
   //----------------------------------------------------------------------------
@@ -291,10 +291,10 @@ class FatVolume : public FatPartition {
    */
   bool relExists(const char* relative_path) {
     FatFile tmp;
-    return tmp.open(vwd(), relative_path, O_RDONLY);
+    return tmp.open(&m_vwd, relative_path, O_RDONLY);
   }
   //----------------------------------------------------------------------------
-  /** Remove a file from the volume root directory.
+  /** Remove a file from the current working directory.
    *
    * \param[in] relative_path Relative path of the file to be tested for.
    *
@@ -302,7 +302,7 @@ class FatVolume : public FatPartition {
    */
   bool relRemove(const char* relative_path) {
     FatFile tmp;
-    return tmp.open(vwd(), relative_path, O_WRONLY) && tmp.remove();
+    return tmp.open(&m_vwd, relative_path, O_WRONLY) && tmp.remove();
   }
   //----------------------------------------------------------------------------
   /** Remove a subdirectory from the current working directory.
@@ -315,14 +315,14 @@ class FatVolume : public FatPartition {
    */
   bool relRmdir(const char* relative_path) {
     FatFile sub;
-    return sub.open(vwd(), relative_path, O_RDONLY) && sub.rmdir();
+    return sub.open(&m_vwd, relative_path, O_RDONLY) && sub.rmdir();
   }
   //----------------------------------------------------------------------------
   /** \return True if this is a directory. */
   bool isDir(const char* relative_path) {
     FatFile dir;
     bool result = false;
-    if (dir.open(vwd(), relative_path, O_RDONLY)) {
+    if (dir.open(&m_vwd, relative_path, O_RDONLY)) {
       if (dir.isDir()) {
         result = true;
       }
@@ -335,13 +335,18 @@ class FatVolume : public FatPartition {
   bool isFile(const char* relative_path) {
     FatFile file;
     bool result = false;
-    if (file.open(vwd(), relative_path, O_RDONLY)) {
+    if (file.open(&m_vwd, relative_path, O_RDONLY)) {
       if (file.isFile()) {
         result = true;
       }
       file.close();
     }
     return result;
+  }
+  //----------------------------------------------------------------------------
+  /** ensure written to disk */
+  void sync() {
+    m_vwd.sync();
   }
 #if ENABLE_ARDUINO_SERIAL
   /** List the directory contents of the root directory to Serial.
