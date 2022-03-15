@@ -44,3 +44,30 @@ bool FatVolume::chdir(const char* path) {
 fail:
   return false;
 }
+// -----------------------------------------------------------------------------
+bool FatVolume::chdir(uint32_t pos) {
+  FatFile dir;
+  
+  if (!m_vwd.seekSet(pos)) {
+    goto fail;
+  }
+
+  dir = vwdOpenNext();
+
+  if (!dir) {
+    DBG_FAIL_MACRO;
+    goto fail;
+  }
+
+  if (!dir.isDir()) {
+    DBG_FAIL_MACRO;
+    goto fail;
+  }
+
+  m_vwd = dir;
+  return true;
+
+ fail:
+  return false;
+}
+// -----------------------------------------------------------------------------

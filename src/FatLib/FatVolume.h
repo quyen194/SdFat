@@ -93,6 +93,12 @@ class FatVolume : public FatPartition {
    * \return true for success or false for failure.
    */
   bool chdir(const char* path);
+  /**
+   * Set volume working directory.
+   * \param[in] pos The new position of sub entry.
+   * \return true for success or false for failure.
+   */
+  bool chdir(uint32_t pos);
   //----------------------------------------------------------------------------
   /**
    * Test for the existence of a file.
