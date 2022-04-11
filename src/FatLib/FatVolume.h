@@ -324,6 +324,20 @@ class FatVolume : public FatPartition {
     return sub.open(&m_vwd, relative_path, O_RDONLY) && sub.rmdir();
   }
   //----------------------------------------------------------------------------
+  /** Recursively delete a subdirectory from the current working directory
+   *  and all contained files
+   *
+   * \param[in] path A path with a valid name for the subdirectory.
+   *
+   * The subdirectory file will be removed only if it is empty.
+   *
+   * \return true for success or false for failure.
+   */
+  bool relRmRfStar(const char* relative_path) {
+    FatFile sub;
+    return sub.open(&m_vwd, relative_path, O_RDONLY) && sub.rmRfStar();
+  }
+  //----------------------------------------------------------------------------
   /** \return True if this is a directory. */
   bool isDir(const char* relative_path) {
     FatFile dir;
